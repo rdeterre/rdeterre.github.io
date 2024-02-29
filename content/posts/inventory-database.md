@@ -52,8 +52,6 @@ our solutions.
 
 ## The Future
 
-### Local Database
-
 In database terms, my inventory is really small potatoes. It would
 easily fit on the device in a small MySQL database. Heck, storing it
 as JSON in a text file would certainly do the trick.
@@ -67,65 +65,66 @@ ideally from the web in the future.
 Yes, I have thought of using Dropbox (or another file sharing service)
 to replicate the file accross devices. No, I don't like it either.
 
-### Using S3
+Using an object storage service like Amazon S3 would be the logical
+next step. If I don't want to use a file-sharing service, just make
+one directly using S3. I'll consider this a solution only if
+everything else fails. I would much prefer using a "real" database.
 
-That's the logical next step. If I don't want to use a file-sharing
-service, just make one directly using S3.
-
-I'll consider this a solution only if everything else fails. Writing
-this post is partly a way to make sure I scrub all the solutions
-available.
-
-### DynamoDB
-
-On the plus side:
-- It is pay-as-you-go. With my usage, it would only cost cents per
-  month!
-- Reliable and stable. It will still be here in 5 years and it won't
-  eat my data.
-
-One big issue. My application requires full-text search (ideally fuzzy
-search and all), and DynamoDB does not support it natively. I would
-need to use AWS OpenSearch or another equivalent service but they are
-all priced per hour ($$$).
+DynamoDB is a real database. It is pay-as-you-go, which scales nicely
+with use. For my needs, it would only cost cents per month! Also, it
+is reliable and stable. It will still be here in 5 years and it won't
+eat my data. One big issue though; My application requires full-text
+search (ideally fuzzy and all), and DynamoDB does not support
+it natively. I would need to use AWS OpenSearch or another equivalent
+service but they are all priced per hour ($$$).
 
 On Google's side, Cloud Firestore [does not
 support](https://firebase.google.com/docs/firestore/solutions/search)
-native full-text search either.
+native full-text search either. All their other database offerings
+look to be priced per hour, although Cloud Spanner is quite misleading
+on this topic.
 
-### Oracle Autonomous Database
+To complete the "big three" cloud service providers, I looked at
+Azure. On their side, everything looks to be priced per hour as well
+instead of pay-as-you-go, which means event the cheapest solution is
+still more than 5$/month which sounds ridiculous for such a trivial
+application. One caveat, their Azure SQL Database product includes a
+[serverless compute
+tier](https://learn.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview?view=azuresql&tabs=general-purpose). It
+still bills per hour but apparently automatically pauses the server
+when it detects inactivity, bringing the hourly cost to zero. This
+*could* be good, but I'm not convinced by their documentation.
 
-On the plus side:
-- it is part Oracle Cloud's "Always Free Tier", so up to 20 GB storage
-  (waaaay more than enough), it is completely free
-- I'm sure Oracle knows what they are doing and won't eat my data
-  (right?)
-  
-The only real issue is that I have no idea how this works, and how
-much work it would be to use it, really.
-
-### MongoDB
-
-Includes a serverless price model that looks very cheap on the
-surface. It also supports full text search.
+I looked at the "cool kids" databases next, starting with MongoDB. It
+includes a serverless price model that looks very cheap on the surface
+and it also supports full text search.
 
 The issue is that I don't know how many "read capacity units" doing
 the text search uses, and doing a google search turns up a lot of
 troubling [forum
 posts](https://www.mongodb.com/community/forums/t/warning-mongo-db-serverless-pricing/187607)
-about prices going through the roof.
+about prices going through the roof. Overall, this still sounds like a
+viable option (the best so far), but I would really need to put alarms
+in place to monitor usage and cost.
 
-### Azure SQL
+I gave a glance at Couchbase, but as far as I can see, it only offers
+per-hour pricing so I just discarded it.
 
-Azure offers a [serverless compute
-tier](https://learn.microsoft.com/en-us/azure/azure-sql/database/serverless-tier-overview?view=azuresql&tabs=general-purpose)
-for Azure SQL, which in theory should do what we want. It bills per
-hour but apparently automatically pauses the server when it detects
-inactivity, bringing the hourly cost to zero.
+There is also [Supabase](https://supabase.com/), which looks to be a
+direct competitor to Nhost. They have a free 500MB tier, but the
+database shuts down after a week of inactivity. I could setup a lambda
+function to run once a day and make a dummy call to it to keep it
+active, but I'd rather find a different solution.
 
-### Couchbase
+Cockroach DB is another one that offers full Postgres functionality
+and has a completely free tier with 50M request units and 10 GB. Very nice!
 
-As far as I can see, it only offers per-hour pricing.
+Lastly, Oracle also offers an "always free tier" with up to 20 GB
+storage. Cool stuff!
+
+CockroachDB and Oracle both look like I should be able to run my
+application with plenty of capacity to spare for free.
+
 
 
 [1]: https://www.avery.com/products/labels/5418
